@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Riga Now — Cosmic demo</title>
+    <meta name="description" content="A live city board for Riga: realtime tram, trolleybus and bus departures, the weather, and today's electricity spot price — built on public data by Cosmic, a software studio in Riga." />
+    <meta property="og:title" content="Riga Now — Cosmic demo" />
+    <meta property="og:description" content="Live departures, weather and the Nord Pool spot price for Riga, on one board." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#03040a" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2303040a'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23ffb35c' stroke-width='2'/%3E%3Cpath d='M16 12v4l3 2' stroke='%23ffb35c' stroke-width='2' fill='none'/%3E%3C/svg%3E" />
+    <!-- Served by the shell on the same origin in production; proxied by Vite in dev. -->
+    <link rel="stylesheet" href="/theme.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <a class="skip" href="#board">Skip to departures</a>
+
+    <header class="topbar">
+      <a class="wordmark" href="https://www.skabene.id.lv/">COSMIC<span> / DEMO</span></a>
+      <a class="label back" href="https://www.skabene.id.lv/#work">← All work</a>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <div class="hero-text">
+          <p class="kicker"><i aria-hidden="true"></i>DEMO 04 / DASHBOARDS</p>
+          <h1 id="title">Riga Now</h1>
+          <p class="lede">A live city board on public data: realtime departures from any Riga stop, the weather, and what electricity costs this hour.</p>
+        </div>
+        <button type="button" class="btn kiosk-btn" id="kiosk" aria-pressed="false">
+          <span class="label">Wall display</span>
+          <svg aria-hidden="true" viewBox="0 0 16 16" width="14" height="14"><path d="M1 5V1h4M11 1h4v4M15 11v4h-4M5 15H1v-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+      </section>
+
+      <div class="dash" id="dash">
+        <section class="card board" id="board" aria-labelledby="board-h">
+          <header class="card-head">
+            <h2 class="label" id="board-h"><span class="num">01</span>Departures</h2>
+            <div class="refresh" id="board-refresh" aria-hidden="true"><span class="refresh-bar"><i></i></span><span class="refresh-t mono"></span></div>
+          </header>
+          <div class="picker">
+            <div class="chips" id="chips" role="group" aria-label="Featured stops"></div>
+            <div class="search">
+              <label class="sr-only" for="stop-search">Search any Riga stop</label>
+              <input id="stop-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search any stop — e.g. Mežaparks, Imanta, Lidosta"
+                role="combobox" aria-expanded="false" aria-controls="stop-results" aria-autocomplete="list" />
+              <ul id="stop-results" role="listbox" aria-label="Matching stops" hidden></ul>
+            </div>
+          </div>
+          <div class="board-title">
+            <div>
+              <p class="station-name" id="station-name">—</p>
+              <p class="station-sub mono small" id="station-sub"></p>
+            </div>
+            <p class="updated mono small" id="board-updated"></p>
+          </div>
+          <p class="sr-only" id="board-status" aria-live="polite"></p>
+          <div class="board-body" id="board-body" aria-busy="true"></div>
+        </section>
+
+        <section class="card clock" aria-labelledby="clock-h">
+          <header class="card-head">
+            <h2 class="label" id="clock-h"><span class="num">02</span>Riga time</h2>
+            <span class="label dim" id="clock-tz">EET</span>
+          </header>
+          <p class="clock-time" id="clock-time" aria-live="off">--:--<span>:--</span></p>
+          <p class="clock-date label" id="clock-date">&nbsp;</p>
+          <dl class="meta" id="sun"></dl>
+        </section>
+
+        <section class="card weather" aria-labelledby="weather-h">
+          <header class="card-head">
+            <h2 class="label" id="weather-h"><span class="num">03</span>Weather</h2>
+            <p class="updated mono small" id="weather-updated"></p>
+          </header>
+          <div class="weather-body" id="weather-body" aria-busy="true"></div>
+        </section>
+
+        <section class="card prices" aria-labelledby="prices-h">
+          <header class="card-head">
+            <h2 class="label" id="prices-h"><span class="num">04</span>Electricity · spot price LV</h2>
+            <p class="updated mono small" id="prices-updated"></p>
+          </header>
+          <div class="prices-body" id="prices-body" aria-busy="true"></div>
+        </section>
+
+        <section class="card week" aria-labelledby="week-h">
+          <header class="card-head">
+            <h2 class="label" id="week-h"><span class="num">05</span>Seven days</h2>
+          </header>
+          <div class="week-body" id="week-body" aria-busy="true"></div>
+        </section>
+      </div>
+
+      <section class="how" aria-labelledby="how-h">
+        <h2 class="label" id="how-h"><i aria-hidden="true"></i>How it works</h2>
+        <ol class="steps">
+          <li>
+            <span class="step-n mono">01</span>
+            <h3 class="title">One origin, no keys</h3>
+            <p class="small mono">The page only talks to its own server. Upstream URLs are fixed server-side; the browser sends stop ids, which are checked against the official stop list before anything leaves the box.</p>
+          </li>
+          <li>
+            <span class="step-n mono">02</span>
+            <h3 class="title">Shared cache</h3>
+            <p class="small mono">Each source is hit at most once per window — departures 20 s, weather 10 min, prices 15 min — however many screens are open. Simultaneous misses share one request.</p>
+          </li>
+          <li>
+            <span class="step-n mono">03</span>
+            <h3 class="title">Degrades, never lies</h3>
+            <p class="small mono">6-second timeouts and back-off. When a source fails the last good answer is served and marked stale with its age, instead of a blank panel or invented numbers.</p>
+          </li>
+          <li>
+            <span class="step-n mono">04</span>
+            <h3 class="title">Riga time, exactly</h3>
+            <p class="small mono">Clocks run in Europe/Riga whatever your device says. Departures arrive as service-day seconds (a 03:00 night bus is "27:00") and are folded against Riga time, corrected for your clock's drift.</p>
+          </li>
+        </ol>
+        <p class="sources small mono">Data: <a href="https://saraksti.lv/">Rīgas Satiksme</a> realtime feed · <a href="https://open-meteo.com/">Open-Meteo</a> (CC BY 4.0) · Nord Pool day-ahead via <a href="https://dashboard.elering.ee/">Elering</a>. Prices exclude VAT, network and trader fees.</p>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span class="label">Built by Cosmic · Riga</span>
+      <a class="label" href="https://www.skabene.id.lv/#contact">Start a project →</a>
+    </footer>
+
+    <script type="module" src="/src/client/main.ts"></script>
+  </body>
+</html>

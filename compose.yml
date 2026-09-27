@@ -1,0 +1,18 @@
+services:
+  riga:
+    build: .
+    image: cosmic-demo-riga:latest
+    container_name: demo-riga
+    restart: unless-stopped
+    mem_limit: 128m
+    environment:
+      - PORT=3104
+    # Loopback only. A bare "3104:3104" would be reachable from the internet: Docker's
+    # DNAT bypasses ufw. Caddy on the host is the only way in.
+    ports:
+      - "127.0.0.1:3104:3104"
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
