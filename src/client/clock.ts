@@ -41,8 +41,9 @@ export function initClock(): void {
       dateEl.textContent = d;
       tzEl.textContent = tzName(now);
     }
-    // Align to the next whole second so the display never skips or doubles a second.
-    window.setTimeout(tick, 1000 - (Date.now() % 1000) + 5);
+    // Align to the next whole second of the (server-corrected) clock that is displayed, so
+    // the seconds never skip or double.
+    window.setTimeout(tick, 1000 - (serverNow() % 1000) + 5);
   };
   tick();
 }

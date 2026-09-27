@@ -1,4 +1,5 @@
-import { SwrCache, UpstreamError, type CacheResult } from './cache.js';
+import { SwrCache, UpstreamBusy, UpstreamError, type CacheResult } from './cache.js';
+import { TokenBuckets } from './rateLimit.js';
 import {
   buildStations,
   findStation,
@@ -103,9 +104,20 @@ const departuresCache = new SwrCache<DeparturesPayload>({
   maxKeys: 400,
 });
 
+/**
+ * Every distinct stop set is its own cache key, so the per-IP limit alone would still let
+ * many addresses together turn this server into a request amplifier aimed at saraksti.lv.
+ * This one global bucket caps real upstream departure fetches, whoever asks: a burst of
+ * 30, then one a second. Cache hits never touch it.
+ */
+const departuresUpstream = new TokenBuckets(30, 1, 1);
+
 export function getDepartures(stopIds: string[], index: StopIndex) {
   const key = stopIds.join(',');
   return departuresCache.get(key, async () => {
+    if (departuresUpstream.take('global') > 0) {
+      throw new UpstreamBusy('too many different stops are being watched right now');
+    }
     // Origin-Custom is what saraksti.lv's own front end sends; without it the feed
     // answers "Bad request".
     const text = await fetchText(`${DEPARTURES_URL}?stopid=${encodeURIComponent(key)}`, {

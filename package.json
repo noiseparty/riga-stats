@@ -11,8 +11,9 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "tsx watch src/server/index.ts",
-    "build": "pnpm run typecheck && vite build && tsc -p tsconfig.server.json",
-    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.server.json",
+    "build": "pnpm run typecheck:src && vite build && tsc -p tsconfig.server.json",
+    "typecheck": "pnpm run typecheck:src && tsc --noEmit -p tsconfig.test.json",
+    "typecheck:src": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.server.json",
     "start": "node dist/node/server/index.js",
     "test": "vitest run"
   },

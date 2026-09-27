@@ -137,6 +137,25 @@ async function refresh(): Promise<void> {
   } catch (err) {
     if (station !== current) return;
     lastError = err instanceof FetchError ? err : new FetchError('Something went wrong loading departures.', 0);
+    // A 400 means the stop ids themselves were refused: typically a station remembered in
+    // localStorage whose ids Rīgas Satiksme has since renumbered. Retrying will never
+    // help, so forget it and fall back to the first featured station.
+    if (lastError.status === 400) {
+      try {
+        localStorage.removeItem(STORE_KEY);
+      } catch {
+        /* ignore */
+      }
+      const fallback = featured.find((f) => f.key !== station.key);
+      if (fallback) {
+        select(fallback);
+        return;
+      }
+      // Featured list not loaded yet: loadFeatured() picks the first one when current is null.
+      current = null;
+      $('board-body').innerHTML = loadingBlock('That saved stop no longer exists. Loading a featured one…');
+      return;
+    }
   }
   nextAt = Date.now() + REFRESH_MS;
   renderBoard();

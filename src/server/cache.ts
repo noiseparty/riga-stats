@@ -37,6 +37,9 @@ export class UpstreamError extends Error {
   }
 }
 
+/** Refused locally to protect the upstream, not a failure of the upstream itself. */
+export class UpstreamBusy extends UpstreamError {}
+
 export class SwrCache<T> {
   private entries = new Map<string, Entry<T>>();
   private readonly now: () => number;

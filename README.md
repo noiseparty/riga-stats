@@ -30,7 +30,9 @@ The departures feed is **undocumented**: it could change without notice. If it d
 - `SwrCache`: at most one upstream request per key per TTL, shared in-flight requests,
   6 s timeouts, and stale-while-error (last good data served with `stale: true`).
 - Per-IP token bucket (40 burst, 1 per 2 s) on `/api/*`, keyed on the first
-  `X-Forwarded-For` entry (Caddy sets it), with a global cap of 64 in-flight API requests.
+  `X-Forwarded-For` entry (Caddy sets it), with a global cap of 64 in-flight API requests, and a separate global bucket (30 burst,
+  1/s) on real upstream departure fetches so many addresses together cannot use the board
+  to hammer saraksti.lv (cache hits are free; a refusal is a 503).
   GET/HEAD only; any request body over 1 KB gets a 413.
 - `src/shared/` holds the pure logic (parsers, Riga-time maths, cheapest window). It is shared
   by server and client and covered by the tests.
@@ -53,6 +55,7 @@ pnpm dev            # Vite on :5173, proxies /demo/riga/api and /theme.css
 ```bash
 pnpm build          # typecheck, then vite build -> dist/client, tsc -> dist/node
 pnpm test           # vitest
+pnpm typecheck      # client, server and test sources
 PORT=3104 node dist/node/server/index.js
 curl http://127.0.0.1:3104/demo/riga/healthz   # ok
 ```
@@ -67,10 +70,14 @@ Caddy has to pass the full path through (no prefix stripping), inside the `www.s
 block, for example:
 
 ```
-handle /demo/riga/* {
+handle /demo/riga* {
     reverse_proxy 127.0.0.1:3104
 }
 ```
+
+`/demo/riga*` (not `/demo/riga/*`) so the bare `/demo/riga` reaches the app's own redirect.
+The block must sit after the site's `request_header -X-Forwarded-For` strip: the rate limit
+keys on the first XFF entry and trusts Caddy to have set it.
 
 `/theme.css` is served by the shell on the same origin. The page still looks right
 without it.

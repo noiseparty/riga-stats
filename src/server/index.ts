@@ -3,7 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { clientIp, TokenBuckets } from './rateLimit.js';
-import { UpstreamError, type CacheResult } from './cache.js';
+import { UpstreamBusy, UpstreamError, type CacheResult } from './cache.js';
 import { getDepartures, getPrices, getStops, getWeather } from './upstream.js';
 import { parseStopIdList, searchStations } from '../shared/stops.js';
 import type { ApiError, Envelope } from '../shared/types.js';
@@ -124,6 +124,11 @@ async function handleApi(route: string, url: URL, req: IncomingMessage, res: Ser
         return fail(res, 404, 'not_found', 'No such API route.', head);
     }
   } catch (err) {
+    if (err instanceof UpstreamBusy) {
+      return fail(res, 503, 'busy', 'The board is watching a lot of stops at once right now. It will retry in a few seconds.', head, {
+        'retry-after': 5,
+      });
+    }
     if (err instanceof UpstreamError) {
       return fail(res, 502, 'upstream_unavailable', `The data source is not answering (${err.message}). The board will retry on its own.`, head, {
         'retry-after': 15,
