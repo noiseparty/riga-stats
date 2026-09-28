@@ -22,7 +22,7 @@ const STOPS_URL = `${SARAKSTI}/riga/stops.txt`;
 const DEPARTURES_URL = `${SARAKSTI}/gpsdata.ashx`;
 const ELERING_URL = 'https://dashboard.elering.ee/api/nps/price';
 
-const UA = 'CosmicRigaNow/0.1 (+https://www.skabene.id.lv/demo/riga/)';
+const UA = 'CosmicRigaNow/0.1 (+https://riga.skabene.id.lv/)';
 const TIMEOUT_MS = 6000;
 const MAX_BYTES = 2 * 1024 * 1024;
 

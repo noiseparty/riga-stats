@@ -3,7 +3,7 @@
 A live city board for Riga on public data: realtime tram, trolleybus and bus departures
 for any stop, the weather (now, next 24 h, 7 days), and the Nord Pool day-ahead electricity
 price for Latvia with the cheapest 3-hour window. It has a wall-display mode
-(`?kiosk` or the button). Served at `https://www.skabene.id.lv/demo/riga/`.
+(`?kiosk` or the button). Served at `https://riga.skabene.id.lv/`.
 
 No keys, no AI, no trackers, no third-party requests from the browser.
 
@@ -24,7 +24,7 @@ The departures feed is **undocumented**: it could change without notice. If it d
 ## How it works
 
 - `src/server/` is a plain `node:http` server with no runtime dependencies. It serves the
-  built frontend and `/demo/riga/api/*`, and redirects `/` to `/demo/riga/`.
+  built frontend and `/api/*`, and redirects `/` to `/`.
 - Every upstream URL is fixed server-side. The browser sends only stop ids, which must match
   `^[A-Za-z0-9]{1,10}$` and exist in the official stop list (max 12 per request).
 - `SwrCache`: at most one upstream request per key per TTL, shared in-flight requests,
@@ -37,7 +37,7 @@ The departures feed is **undocumented**: it could change without notice. If it d
 - `src/shared/` holds the pure logic (parsers, Riga-time maths, cheapest window). It is shared
   by server and client and covered by the tests.
 
-API (all under `/demo/riga/api/`): `stations`, `stations/search?q=`, `departures?stops=a,b`,
+API (all under `/api/`): `stations`, `stations/search?q=`, `departures?stops=a,b`,
 `weather`, `prices`. Responses are `{ data, fetchedAt, stale, now, source }`; errors are
 `{ error, message }` with a proper status (400 / 404 / 405 / 413 / 429 / 502 / 503).
 
@@ -46,8 +46,8 @@ API (all under `/demo/riga/api/`): `stations`, `stations/search?q=`, `departures
 ```bash
 pnpm install
 pnpm dev:server     # API + static on :3104 (tsx watch)
-pnpm dev            # Vite on :5173, proxies /demo/riga/api and /theme.css
-# open http://localhost:5173/demo/riga/
+pnpm dev            # Vite on :5173, proxies /api and /theme.css
+# open http://localhost:5173/
 ```
 
 ## Build, test, run
@@ -57,7 +57,7 @@ pnpm build          # typecheck, then vite build -> dist/client, tsc -> dist/nod
 pnpm test           # vitest
 pnpm typecheck      # client, server and test sources
 PORT=3104 node dist/node/server/index.js
-curl http://127.0.0.1:3104/demo/riga/healthz   # ok
+curl http://127.0.0.1:3104/healthz   # ok
 ```
 
 ## Deploy (VPS)
@@ -66,18 +66,22 @@ curl http://127.0.0.1:3104/demo/riga/healthz   # ok
 docker compose up -d --build     # publishes 127.0.0.1:3104 only
 ```
 
-Caddy has to pass the full path through (no prefix stripping), inside the `www.skabene.id.lv`
-block, for example:
+Caddy fronts it on its own host, riga.skabene.id.lv:
 
 ```
-handle /demo/riga* {
-    reverse_proxy 127.0.0.1:3104
+riga.skabene.id.lv {
+    request_header -X-Forwarded-For
+    handle /theme.css {
+        reverse_proxy 127.0.0.1:3000   # the shell, which owns the design tokens
+    }
+    handle {
+        reverse_proxy 127.0.0.1:3104
+    }
 }
 ```
 
-`/demo/riga*` (not `/demo/riga/*`) so the bare `/demo/riga` reaches the app's own redirect.
-The block must sit after the site's `request_header -X-Forwarded-For` strip: the rate limit
-keys on the first XFF entry and trusts Caddy to have set it.
+The `X-Forwarded-For` strip matters: the rate limit keys on the first XFF entry and trusts
+Caddy to have set it.
 
-`/theme.css` is served by the shell on the same origin. The page still looks right
+`/theme.css` is proxied to the shell by Caddy. The page still looks right
 without it.

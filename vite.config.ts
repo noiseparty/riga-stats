@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
-const BASE = '/demo/riga/';
+const BASE = '/';
 const API_PORT = Number(process.env.PORT ?? 3104);
 
 export default defineConfig({

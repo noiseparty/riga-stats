@@ -8,7 +8,8 @@ import { getDepartures, getPrices, getStops, getWeather } from './upstream.js';
 import { parseStopIdList, searchStations } from '../shared/stops.js';
 import type { ApiError, Envelope } from '../shared/types.js';
 
-export const BASE = '/demo/riga';
+/** Served at the root of riga.skabene.id.lv. Set a prefix here to mount it under a path. */
+export const BASE = '';
 const PORT = Number(process.env.PORT ?? 3104);
 const HOST = process.env.HOST ?? '0.0.0.0';
 
@@ -189,7 +190,7 @@ export async function handle(req: IncomingMessage, res: ServerResponse): Promise
   }
   const path = url.pathname;
 
-  if (path === '/' || path === BASE) {
+  if (BASE && (path === '/' || path === BASE)) {
     res.writeHead(302, { location: `${BASE}/` });
     return void res.end();
   }
