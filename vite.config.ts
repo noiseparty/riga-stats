@@ -15,7 +15,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       // The shell serves /theme.css on the same origin in production.
-      '/theme.css': { target: 'https://www.skabene.id.lv', changeOrigin: true, secure: true },
+      '/theme.css': { target: 'https://www.repo.lv', changeOrigin: true, secure: true },
       // `pnpm dev:server` runs the real API on PORT.
       [`${BASE}api`]: { target: `http://127.0.0.1:${API_PORT}` },
     },

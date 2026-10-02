@@ -1,9 +1,9 @@
-# Riga Now — Cosmic demo 04
+# Riga Now — Repo demo 04
 
 A live city board for Riga on public data: realtime tram, trolleybus and bus departures
 for any stop, the weather (now, next 24 h, 7 days), and the Nord Pool day-ahead electricity
 price for Latvia with the cheapest 3-hour window. It has a wall-display mode
-(`?kiosk` or the button). Served at `https://riga.skabene.id.lv/`.
+(`?kiosk` or the button). Served at `https://riga.repo.lv/`.
 
 No keys, no AI, no trackers, no third-party requests from the browser.
 
@@ -66,10 +66,10 @@ curl http://127.0.0.1:3104/healthz   # ok
 docker compose up -d --build     # publishes 127.0.0.1:3104 only
 ```
 
-Caddy fronts it on its own host, riga.skabene.id.lv:
+Caddy fronts it on its own host, riga.repo.lv:
 
 ```
-riga.skabene.id.lv {
+riga.repo.lv {
     request_header -X-Forwarded-For
     handle /theme.css {
         reverse_proxy 127.0.0.1:3000   # the shell, which owns the design tokens

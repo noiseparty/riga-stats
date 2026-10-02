@@ -2,7 +2,7 @@
   "name": "riga-now",
   "version": "0.1.0",
   "private": true,
-  "description": "Riga Now: a live city board (transit, weather, electricity price). A Cosmic demo.",
+  "description": "Riga Now: a live city board (transit, weather, electricity price). A Repo demo.",
   "type": "module",
   "packageManager": "pnpm@10.29.1",
   "engines": {

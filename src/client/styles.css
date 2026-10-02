@@ -1,5 +1,5 @@
 /*
- * Riga Now — styled to sit inside the Cosmic portfolio: the landing page's deep-space ink,
+ * Riga Now — styled to sit inside the Repo portfolio: the landing page's deep-space ink,
  * paper type, amber accent and hairlines (shell/src/app/landing.css), with the --pf-* app
  * tokens from /theme.css used where they fit. Every value has a local fallback, so the page
  * still reads properly if theme.css fails to load.
