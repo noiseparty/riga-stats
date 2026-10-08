@@ -1,7 +1,7 @@
 services:
   riga:
     build: .
-    image: cosmic-demo-riga:latest
+    image: repo-demo-riga:latest
     container_name: demo-riga
     restart: unless-stopped
     mem_limit: 128m
